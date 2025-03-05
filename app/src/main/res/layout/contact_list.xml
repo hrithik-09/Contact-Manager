@@ -7,21 +7,13 @@
             name="contact"
             type="com.example.contacts.Contact" />
     </data>
-    <androidx.cardview.widget.CardView
-        android:elevation="20dp"
-        app:cardCornerRadius="20dp"
-        android:layout_marginLeft="20dp"
-        android:layout_marginRight="20dp"
-        android:layout_marginTop="5dp"
-        android:layout_marginBottom="5dp"
+
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
-        <androidx.constraintlayout.widget.ConstraintLayout
-
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:layout_margin="16dp">
-
+        android:layout_height="wrap_content"
+        android:paddingTop="16dp"
+        android:layout_marginVertical="5dp"
+        android:paddingHorizontal="16dp">
     <TextView
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -29,21 +21,19 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:id="@+id/contactName"
-        android:textSize="32sp"
+        android:textSize="20sp"
+        android:fontFamily="@font/roboto_regular"
         android:text="@{contact.name}"
-        android:textColor="@color/black"/>
+        android:textColor="@color/textPrimary"/>
+        <View
+            android:layout_marginTop="5dp"
+            app:layout_constraintTop_toBottomOf="@id/contactName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#232323"/>
 
-    <TextView
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/contactName"
-        android:id="@+id/contactEmail"
-        android:textSize="16sp"
-        android:text="@{contact.email}"
-        android:textColor="@color/black"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
-    </androidx.cardview.widget.CardView>
 </layout>
