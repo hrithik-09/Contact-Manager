@@ -2,10 +2,12 @@ package com.example.contacts;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProvider;
+import androidx.recyclerview.widget.ItemTouchHelper;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,8 +45,6 @@ public class MainActivity extends AppCompatActivity {
         //ViewModel
         MyViewModel viewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
-        Contact c1 = new Contact("hr@gmail.com","HR");
-        viewModel.addNewContact(c1);
 
         viewModel.getAllContacts().observe(this, new Observer<List<Contact>>() {
             @Override
@@ -60,5 +60,21 @@ public class MainActivity extends AppCompatActivity {
         contactAdapter = new ContactAdapter(contactsArrayList);
 
         recyclerView.setAdapter(contactAdapter);
+
+        // swipe to delete
+        new ItemTouchHelper(new ItemTouchHelper.SimpleCallback(0,ItemTouchHelper.LEFT) {
+            @Override
+            public boolean onMove(@NonNull RecyclerView recyclerView, @NonNull RecyclerView.ViewHolder viewHolder, @NonNull RecyclerView.ViewHolder target) {
+                return false;
+            }
+
+            @Override
+            public void onSwiped(@NonNull RecyclerView.ViewHolder viewHolder, int direction) {
+                // If you swipe the item to the left
+                Contact c = contactsArrayList.get(viewHolder.getAdapterPosition());
+
+                viewModel.deleteContact(c);
+            }
+        }).attachToRecyclerView(recyclerView);
     }
 }

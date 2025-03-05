@@ -27,7 +27,7 @@ public class AddNewContact extends AppCompatActivity {
                 R.layout.activity_add_new_contact
         );
 
-        // VIew Model
+        // View Model
         MyViewModel myViewModel = new ViewModelProvider(this)
                 .get(MyViewModel.class);
 
