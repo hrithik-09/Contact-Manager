@@ -38,6 +38,13 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
         Contact currentContact=contacts.get(position);
         holder.contactListBinding.setContact(currentContact);
+        holder.contactListBinding.contactImage.setVisibility(View.GONE);
+        holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
+
+        if (currentContact.getName() != null && !currentContact.getName().isEmpty()) {
+            String firstLetter = String.valueOf(currentContact.getName().charAt(0)).toUpperCase();
+            holder.contactListBinding.contactInitial.setText(firstLetter);
+        }
     }
 
     @Override

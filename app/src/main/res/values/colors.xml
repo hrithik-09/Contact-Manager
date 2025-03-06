@@ -2,6 +2,7 @@
 <resources>
     <color name="textPrimary">#000000</color>
     <color name="fab_background">#FFFFFF</color>
+    <color name="background_primary">#F6F6F6</color>
 
     <color name="white">#FFFFFF</color>
     <color name="black">#000000</color>
