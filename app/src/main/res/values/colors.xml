@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="textPrimary">#000000</color>
+    <color name="textSecondary">#FFFFFF</color>
+
     <color name="fab_background">#FFFFFF</color>
     <color name="background_primary">#F6F6F6</color>
 

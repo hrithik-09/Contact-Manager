@@ -3,4 +3,5 @@
     <color name="textPrimary">#ffffff</color>
     <color name="fab_background">#000000</color>
     <color name="background_primary">#000000</color>
+    <color name="textSecondary">#000000</color>
 </resources>

@@ -41,8 +41,8 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         holder.contactListBinding.contactImage.setVisibility(View.GONE);
         holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
 
-        if (currentContact.getName() != null && !currentContact.getName().isEmpty()) {
-            String firstLetter = String.valueOf(currentContact.getName().charAt(0)).toUpperCase();
+        if (currentContact.getFirstName() != null && !currentContact.getFirstName().isEmpty()) {
+            String firstLetter = String.valueOf(currentContact.getFirstName().charAt(0)).toUpperCase();
             holder.contactListBinding.contactInitial.setText(firstLetter);
         }
     }

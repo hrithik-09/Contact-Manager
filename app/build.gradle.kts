@@ -48,12 +48,14 @@ dependencies {
     val room_version = "2.6.1"
     val lifecycle_version = "2.8.7"
     val arch_version = "2.2.0"
+    implementation ("com.google.code.gson:gson:2.10.1")
 
     implementation("androidx.room:room-runtime:$room_version")
 
     // If this project only uses Java source, use the Java annotationProcessor
     // No additional plugins are necessary
     annotationProcessor("androidx.room:room-compiler:$room_version")
+    implementation ("com.google.android.material:material:1.10.0")
 
     // ViewModel
     implementation ("androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version")

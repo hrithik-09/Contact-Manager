@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string-array name="phone_types">
+        <item>Personal</item>
+        <item>WhatsApp</item>
+        <item>Calling</item>
+        <item>Father</item>
+        <item>Mother</item>
+        <item>Sibling</item>
+    </string-array>
+</resources>

@@ -47,13 +47,47 @@
                     android:textColor="@color/textPrimary"/>
             </FrameLayout>
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/contactName"
+                android:id="@+id/contactPName"
                 android:textSize="20sp"
                 android:layout_gravity="center"
                 android:fontFamily="@font/roboto_regular"
-                android:text="@{contact.name}"
+                android:text="@{contact.prefix}"
+                android:textColor="@color/textPrimary"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/roboto_regular"
+                android:text=" "
+                android:textColor="@color/textPrimary"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/contactFName"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/roboto_regular"
+                android:text="@{contact.firstName}"
+                android:textColor="@color/textPrimary"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/roboto_regular"
+                android:text=" "
+                android:textColor="@color/textPrimary"/>
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/contactSName"
+                android:textSize="20sp"
+                android:layout_gravity="center"
+                android:fontFamily="@font/roboto_regular"
+                android:text="@{contact.surname}"
                 android:textColor="@color/textPrimary"/>
 
         </LinearLayout>
