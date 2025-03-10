@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="20dp"
+    android:orientation="vertical"
+    android:background="@drawable/ic_contact_list_background">
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save your changes or discard them ?"
+        android:textColor="@color/textPrimary"
+        android:fontFamily="@font/roboto_regular"
+        android:textSize="14sp"/>
+    
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="15dp"
+        android:orientation="horizontal">
+    <TextView
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:text="Cancel"
+        android:id="@+id/cancelButton"
+        android:textAlignment="center"
+        android:textSize="18sp"
+        android:fontFamily="@font/roboto_semibold"
+        android:textColor="@color/textPrimary"/>
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.005"
+            android:background="#E6E6E6"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Discard"
+            android:id="@+id/discardButton"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:fontFamily="@font/roboto_semibold"
+            android:textColor="@color/textPrimary"/>
+
+        <View
+            android:layout_width="1dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.005"
+            android:background="#E6E6E6"/>
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="Save"
+            android:id="@+id/saveButton"
+            android:textAlignment="center"
+            android:textSize="18sp"
+            android:fontFamily="@font/roboto_semibold"
+            android:textColor="@color/textPrimary"/>
+
+    </LinearLayout>
+        
+        
+
+</LinearLayout>

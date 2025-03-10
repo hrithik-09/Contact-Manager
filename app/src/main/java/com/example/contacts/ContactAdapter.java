@@ -11,6 +11,7 @@ import androidx.annotation.NonNull;
 import androidx.databinding.DataBindingUtil;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
 import com.example.contacts.databinding.ContactListBinding;
 
 import java.util.ArrayList;
@@ -38,13 +39,31 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
         Contact currentContact=contacts.get(position);
         holder.contactListBinding.setContact(currentContact);
-        holder.contactListBinding.contactImage.setVisibility(View.GONE);
-        holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
 
-        if (currentContact.getFirstName() != null && !currentContact.getFirstName().isEmpty()) {
-            String firstLetter = String.valueOf(currentContact.getFirstName().charAt(0)).toUpperCase();
-            holder.contactListBinding.contactInitial.setText(firstLetter);
+        Glide.with(holder.itemView.getContext()).clear(holder.contactListBinding.contactImage);
+        if (currentContact.getProfileImageUri() != null) {
+            // Load contact image
+            holder.contactListBinding.contactImage.setVisibility(View.VISIBLE);
+            holder.contactListBinding.contactInitial.setVisibility(View.GONE);
+
+            Glide.with(holder.itemView.getContext())
+                    .load(currentContact.getProfileImageUri())
+                    .circleCrop()
+                    .into(holder.contactListBinding.contactImage);
+        } else {
+            // Show initial instead
+            holder.contactListBinding.contactImage.setVisibility(View.GONE);
+            holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
+            String firstName = currentContact.getFirstName();
+            if (firstName != null && !firstName.trim().isEmpty()) {
+                String firstLetter = String.valueOf(firstName.trim().charAt(0)).toUpperCase();
+                holder.contactListBinding.contactInitial.setText(firstLetter);
+            } else {
+                // Handle cases where no valid name exists
+                holder.contactListBinding.contactInitial.setText("#"); // Default or placeholder
+            }
         }
+
     }
 
     @Override

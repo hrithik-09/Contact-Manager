@@ -1,13 +1,16 @@
 package com.example.contacts;
 
 import android.app.DatePickerDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Parcel;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Patterns;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
@@ -21,18 +24,24 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.google.android.material.bottomsheet.BottomSheetDialog;
+import com.google.android.material.datepicker.CalendarConstraints;
+import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
 public class AddNewContact extends AppCompatActivity {
     private MyViewModel myViewModel;
     private Contact contact;
 
-    private ImageView contactImage, addImageIcon;
+    private ImageView contactImage, addImageIcon,goBack;
     private TextInputEditText firstName, surname, prefix, email, address, birthday,mobileNumber;
-    TextInputLayout firstNameInputLayout,mobileNumberInputLayout,emailInputLayout;
+    private TextInputLayout firstNameInputLayout,mobileNumberInputLayout,emailInputLayout,birthdayInputLayout;
     private TextView saveButton, cancelButton;
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -61,10 +70,13 @@ public class AddNewContact extends AppCompatActivity {
         prefix = findViewById(R.id.prefix);
         email = findViewById(R.id.email);
         address = findViewById(R.id.address);
+        birthdayInputLayout=findViewById(R.id.birthdayInputLayout);
         birthday = findViewById(R.id.birthday);
+
         saveButton = findViewById(R.id.saveButton);
         cancelButton = findViewById(R.id.cancelButton);
         mobileNumber = findViewById(R.id.mobileNumber);
+        goBack=findViewById(R.id.goBack);
         contact = new Contact();
         myViewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
@@ -83,27 +95,113 @@ public class AddNewContact extends AppCompatActivity {
             return false;
         });
 
+
+
+            goBack.setOnClickListener(v1 -> {
+                showBottomSheetDialog();
+            });
+        birthdayInputLayout.setEndIconOnClickListener(v -> {
+            showDatePicker();
+            birthday.requestFocus();
+        });
+
+        birthdayInputLayout.setOnClickListener(v -> {
+            showDatePicker();
+            birthday.requestFocus();
+        });
+
+
+
+        birthday.setOnFocusChangeListener((v, hasFocus) -> {
+            if (hasFocus) {
+                birthday.clearFocus();
+                showDatePicker();
+            }
+        });
+
+        birthday.setOnClickListener(v -> {
+            birthday.clearFocus();
+            showDatePicker();
+        });
+
+        birthdayInputLayout.setEndIconOnClickListener(v -> showDatePicker());
+
+
+
+
     }
+
+
+    private void showDatePicker() {
+        Calendar calendar = Calendar.getInstance();
+        calendar.set(Calendar.HOUR_OF_DAY, 0);
+        calendar.set(Calendar.MINUTE, 0);
+        calendar.set(Calendar.SECOND, 0);
+        calendar.set(Calendar.MILLISECOND, 0);
+        long today = calendar.getTimeInMillis();
+
+        // Define start date if you want to restrict past dates as well
+        Calendar startCalendar = Calendar.getInstance();
+        startCalendar.set(Calendar.YEAR, 1900); // Example: Year 1900
+        long startDate = startCalendar.getTimeInMillis();
+
+        // Custom DateValidator to allow today but restrict future dates
+        CalendarConstraints.DateValidator dateValidator = new CalendarConstraints.DateValidator() {
+            @Override
+            public boolean isValid(long date) {
+                return date <= today || isSameDay(date, today);
+            }
+
+            @Override
+            public int describeContents() {
+                return 0;
+            }
+
+            @Override
+            public void writeToParcel(Parcel dest, int flags) {
+            }
+
+            // Utility method to compare two dates without time consideration
+            private boolean isSameDay(long date1, long date2) {
+                Calendar cal1 = Calendar.getInstance();
+                cal1.setTimeInMillis(date1);
+
+                Calendar cal2 = Calendar.getInstance();
+                cal2.setTimeInMillis(date2);
+
+                return cal1.get(Calendar.YEAR) == cal2.get(Calendar.YEAR) &&
+                        cal1.get(Calendar.DAY_OF_YEAR) == cal2.get(Calendar.DAY_OF_YEAR);
+            }
+        };
+
+        CalendarConstraints.Builder constraintsBuilder = new CalendarConstraints.Builder()
+                .setStart(startDate) // Optional: Restrict past dates before year 1900
+                .setEnd(today)       // Allow today and restrict future dates
+                .setValidator(dateValidator);  // Restrict future dates properly
+
+        MaterialDatePicker<Long> datePicker = MaterialDatePicker.Builder.datePicker()
+                .setTitleText("Select Date of Birth")
+                .setSelection(today)  // Defaults selection to today's date
+                .setCalendarConstraints(constraintsBuilder.build())
+                .build();
+
+        datePicker.show(getSupportFragmentManager(), "MATERIAL_DATE_PICKER");
+
+        datePicker.addOnPositiveButtonClickListener(selection -> {
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+            String selectedDate = sdf.format(new Date(selection));
+            birthday.setText(selectedDate);
+        });
+    }
+
+
+
 
     private void openImagePicker() {
         Intent pickIntent = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
         imagePickerLauncher.launch(pickIntent);
     }
 
-    private void showDatePicker() {
-        Calendar calendar = Calendar.getInstance();
-        int year = calendar.get(Calendar.YEAR);
-        int month = calendar.get(Calendar.MONTH);
-        int day = calendar.get(Calendar.DAY_OF_MONTH);
-
-        DatePickerDialog datePickerDialog = new DatePickerDialog(this, (view, selectedYear, selectedMonth, selectedDay) -> {
-            String selectedDate = selectedDay + "/" + (selectedMonth + 1) + "/" + selectedYear;
-            birthday.setText(selectedDate);
-            contact.setBirthday(selectedDate);
-        }, year, month, day);
-
-        datePickerDialog.show();
-    }
     private void addTextWatchers() {
         email.addTextChangedListener(new ValidationTextWatcher(email));
         mobileNumber.addTextChangedListener(new ValidationTextWatcher(mobileNumber));
@@ -137,7 +235,7 @@ public class AddNewContact extends AppCompatActivity {
             mobileNumberInputLayout.setError(null);
         }
 
-        // Populate Contact Object
+
         contact.setFirstName(firstNameText);
         contact.setSurname(surnameText);
         contact.setPrefix(prefixText);
@@ -145,11 +243,11 @@ public class AddNewContact extends AppCompatActivity {
         contact.setAddress(addressText);
         contact.setMobileNumber(mobileNumberText);
 
-        // Save contact using ViewModel
+
         myViewModel.addNewContact(contact);
         Toast.makeText(this, "Contact Saved!", Toast.LENGTH_SHORT).show();
 
-        // Navigate back to MainActivity
+
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
@@ -183,4 +281,35 @@ public class AddNewContact extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {}
     }
+
+    @Override
+    public void onBackPressed() {
+        showBottomSheetDialog();
+//        super.onBackPressed();
+    }
+
+    private void showBottomSheetDialog() {
+        BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+        View bottomSheetView = getLayoutInflater().inflate(R.layout.go_back_popup_layout, null);
+        bottomSheetDialog.setContentView(bottomSheetView);
+
+        TextView cancelButton = bottomSheetView.findViewById(R.id.cancelButton);
+        TextView discardButton = bottomSheetView.findViewById(R.id.discardButton);
+        TextView saveButton = bottomSheetView.findViewById(R.id.saveButton);
+
+        cancelButton.setOnClickListener(view -> bottomSheetDialog.dismiss());
+        discardButton.setOnClickListener(view -> {
+            bottomSheetDialog.dismiss();
+            super.onBackPressed();
+            overridePendingTransition(R.anim.slide_in_left, R.anim.slide_out_right);
+        });
+        saveButton.setOnClickListener(view -> {
+            // Add your save logic here
+            saveContact();
+            bottomSheetDialog.dismiss();
+        });
+
+        bottomSheetDialog.show();
+    }
+
 }
