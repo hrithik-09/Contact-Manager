@@ -2,6 +2,7 @@ package com.example.contacts;
 
 
 
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,7 +43,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
 
         Glide.with(holder.itemView.getContext()).clear(holder.contactListBinding.contactImage);
         if (currentContact.getProfileImageUri() != null) {
-            // Load contact image
+
             holder.contactListBinding.contactImage.setVisibility(View.VISIBLE);
             holder.contactListBinding.contactInitial.setVisibility(View.GONE);
 
@@ -51,7 +52,7 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                     .circleCrop()
                     .into(holder.contactListBinding.contactImage);
         } else {
-            // Show initial instead
+
             holder.contactListBinding.contactImage.setVisibility(View.GONE);
             holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
             String firstName = currentContact.getFirstName();
@@ -59,10 +60,15 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
                 String firstLetter = String.valueOf(firstName.trim().charAt(0)).toUpperCase();
                 holder.contactListBinding.contactInitial.setText(firstLetter);
             } else {
-                // Handle cases where no valid name exists
-                holder.contactListBinding.contactInitial.setText("#"); // Default or placeholder
+
+                holder.contactListBinding.contactInitial.setText("#");
             }
         }
+        holder.itemView.setOnClickListener(v -> {
+            Intent intent = new Intent(holder.itemView.getContext(), EditContact.class);
+            intent.putExtra("CONTACT_ID", currentContact.getId()); // Pass the contact ID or data
+            holder.itemView.getContext().startActivity(intent);
+        });
 
     }
 

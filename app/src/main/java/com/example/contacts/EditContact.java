@@ -1,7 +1,5 @@
 package com.example.contacts;
 
-import android.app.DatePickerDialog;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -12,18 +10,20 @@ import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Patterns;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.graphics.Insets;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -37,7 +37,7 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
-public class AddNewContact extends AppCompatActivity {
+public class EditContact extends AppCompatActivity {
     private MyViewModel myViewModel;
     private Contact contact;
 
@@ -55,11 +55,11 @@ public class AddNewContact extends AppCompatActivity {
                     }
                 }
             });
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_new_contact);
+        setContentView(R.layout.activity_edit_contact);
+
 
         // Initialize Views
         firstNameInputLayout=findViewById(R.id.firstNameInputLayout);
@@ -99,9 +99,9 @@ public class AddNewContact extends AppCompatActivity {
 
 
 
-            goBack.setOnClickListener(v1 -> {
-                showBottomSheetDialog();
-            });
+        goBack.setOnClickListener(v1 -> {
+            showBottomSheetDialog();
+        });
         birthdayInputLayout.setEndIconOnClickListener(v -> {
             showDatePicker();
             birthday.requestFocus();
@@ -130,9 +130,7 @@ public class AddNewContact extends AppCompatActivity {
 
 
 
-
     }
-
 
     private void showDatePicker() {
         Calendar calendar = Calendar.getInstance();
@@ -205,8 +203,8 @@ public class AddNewContact extends AppCompatActivity {
     }
 
     private void addTextWatchers() {
-        email.addTextChangedListener(new ValidationTextWatcher(email));
-        mobileNumber.addTextChangedListener(new ValidationTextWatcher(mobileNumber));
+        email.addTextChangedListener(new EditContact.ValidationTextWatcher(email));
+        mobileNumber.addTextChangedListener(new EditContact.ValidationTextWatcher(mobileNumber));
     }
     private void saveContact() {
         String firstNameText = firstName.getText().toString().trim();
@@ -266,14 +264,14 @@ public class AddNewContact extends AppCompatActivity {
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
             if (!firstName.getText().toString().trim().isEmpty())
-               {
+            {
                 firstNameInputLayout.setError(null);
             }
 
             if (Patterns.EMAIL_ADDRESS.matcher(email.getText().toString().trim()).matches())
-                {
-                    emailInputLayout.setError(null);
-                }
+            {
+                emailInputLayout.setError(null);
+            }
 
             if (mobileNumber.getText().toString().trim().length() ==10 )  {
                 mobileNumberInputLayout.setError(null);
@@ -283,7 +281,6 @@ public class AddNewContact extends AppCompatActivity {
         @Override
         public void afterTextChanged(Editable s) {}
     }
-
     @Override
     public void onBackPressed() {
         showBottomSheetDialog();
@@ -314,5 +311,4 @@ public class AddNewContact extends AppCompatActivity {
 
         bottomSheetDialog.show();
     }
-
 }
