@@ -1,18 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<layout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
-<LinearLayout
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:background="@color/background_primary"
-    android:padding="16dp"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
 
     <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingHorizontal="16dp"
+        android:fillViewport="true"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@+id/buttonContainer"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         >
 
         <LinearLayout
@@ -53,6 +57,11 @@
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                app:hintTextColor="@color/textPrimary"
+                android:layout_marginTop="5dp"
+                android:id="@+id/firstNameInputLayout"
                 android:layout_height="wrap_content"
                 android:hint="First Name">
 
@@ -67,6 +76,10 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                android:layout_marginTop="5dp"
+                app:hintTextColor="@color/textPrimary"
                 android:hint="Surname">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -80,6 +93,10 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                app:hintTextColor="@color/textPrimary"
+                android:layout_marginTop="5dp"
                 android:hint="Prefix">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -92,6 +109,7 @@
             <LinearLayout
                 android:id="@+id/mobileNumberContainer"
                 android:layout_width="match_parent"
+                android:layout_marginTop="5dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
@@ -104,6 +122,10 @@
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        app:boxStrokeColor="@color/text_input_outline_color"
+                        app:boxStrokeErrorColor="@color/error"
+                        app:hintTextColor="@color/textPrimary"
+                        android:id="@+id/mobileNumberInputLayout"
                         android:layout_weight="1.5"
                         android:hint="Mobile Number">
 
@@ -127,9 +149,14 @@
 
             <!-- Email -->
             <com.google.android.material.textfield.TextInputLayout
+                android:layout_marginTop="5dp"
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                android:id="@+id/emailInputLayout"
+                app:hintTextColor="@color/textPrimary"
                 android:hint="Email ID">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -144,14 +171,20 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                app:hintTextColor="@color/textPrimary"
                     android:hint="DOB">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:onClick="onBirthdayClicked"
                     android:id="@+id/birthday"
+                    android:layout_marginTop="5dp"
                     android:focusable="false"
+                    app:boxStrokeColor="@color/text_input_outline_color"
+                    app:boxStrokeErrorColor="@color/error"
+                    app:hintTextColor="@color/textPrimary"
                     android:clickable="false"
-                    android:inputType="none"
+                    android:inputType="date"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
@@ -161,6 +194,11 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="30dp"
+                app:boxStrokeColor="@color/text_input_outline_color"
+                app:boxStrokeErrorColor="@color/error"
+                app:hintTextColor="@color/textPrimary"
+                android:layout_marginTop="5dp"
                 android:hint="Address">
 
                 <com.google.android.material.textfield.TextInputEditText
@@ -169,24 +207,16 @@
                     android:layout_height="wrap_content"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- Cancel & Save Buttons -->
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:layout_marginTop="10dp"
-                android:gravity="center">
-            </LinearLayout>
-
         </LinearLayout>
     </ScrollView>
-<!--    <View-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="0dp"-->
-<!--        android:layout_weight="1"/>-->
     <LinearLayout
+        android:padding="12dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:id="@+id/buttonContainer"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
         android:orientation="horizontal">
         <TextView
             android:layout_width="0dp"
@@ -213,5 +243,4 @@
             android:id="@+id/saveButton"
             android:text="Save"/>
     </LinearLayout>
-</LinearLayout>
-</layout>
+</androidx.constraintlayout.widget.ConstraintLayout>

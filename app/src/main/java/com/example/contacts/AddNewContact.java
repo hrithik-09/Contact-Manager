@@ -5,40 +5,34 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
-import androidx.databinding.DataBindingUtil;
 import androidx.lifecycle.ViewModelProvider;
 
-import com.example.contacts.databinding.ActivityAddNewContactBinding;
 import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textfield.TextInputLayout;
 
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
 
 public class AddNewContact extends AppCompatActivity {
     private MyViewModel myViewModel;
     private Contact contact;
 
     private ImageView contactImage, addImageIcon;
-    private EditText firstName, surname, prefix, email, address, birthday,mobileNumber;
+    private TextInputEditText firstName, surname, prefix, email, address, birthday,mobileNumber;
+    TextInputLayout firstNameInputLayout,mobileNumberInputLayout,emailInputLayout;
     private TextView saveButton, cancelButton;
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
@@ -57,6 +51,9 @@ public class AddNewContact extends AppCompatActivity {
         setContentView(R.layout.activity_add_new_contact);
 
         // Initialize Views
+        firstNameInputLayout=findViewById(R.id.firstNameInputLayout);
+        emailInputLayout=findViewById(R.id.emailInputLayout);
+        mobileNumberInputLayout=findViewById(R.id.mobileNumberInputLayout);
         contactImage = findViewById(R.id.contactImage);
         addImageIcon = findViewById(R.id.addImageIcon);
         firstName = findViewById(R.id.firstName);
@@ -77,7 +74,7 @@ public class AddNewContact extends AppCompatActivity {
         saveButton.setOnClickListener(v -> saveContact());
         cancelButton.setOnClickListener(v -> finish()); // Simply close the activity
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);
-
+        addTextWatchers();
         findViewById(R.id.rootLayout).setOnTouchListener((v, event) -> {
             InputMethodManager imm = (InputMethodManager) getSystemService(INPUT_METHOD_SERVICE);
             if (imm != null) {
@@ -107,7 +104,10 @@ public class AddNewContact extends AppCompatActivity {
 
         datePickerDialog.show();
     }
-
+    private void addTextWatchers() {
+        email.addTextChangedListener(new ValidationTextWatcher(email));
+        mobileNumber.addTextChangedListener(new ValidationTextWatcher(mobileNumber));
+    }
     private void saveContact() {
         String firstNameText = firstName.getText().toString().trim();
         String surnameText = surname.getText().toString().trim();
@@ -116,9 +116,25 @@ public class AddNewContact extends AppCompatActivity {
         String addressText = address.getText().toString().trim();
         String mobileNumberText=mobileNumber.getText().toString().trim();
 
-        if (firstNameText.isEmpty() || mobileNumberText.isEmpty()) {
-            Toast.makeText(this, "Fill the necessary fields", Toast.LENGTH_SHORT).show();
+        if (firstNameText.isEmpty()) {
+            firstNameInputLayout.setError("First Name is required");
             return;
+        } else {
+            firstNameInputLayout.setError(null);
+        }
+
+        if (!Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
+            emailInputLayout.setError("Invalid email format");
+            return;
+        } else {
+            emailInputLayout.setError(null);
+        }
+
+        if (mobileNumber.length() !=10 ) {
+            mobileNumberInputLayout.setError("Mobile no. must be 10 digits");
+            return;
+        } else {
+            mobileNumberInputLayout.setError(null);
         }
 
         // Populate Contact Object
@@ -136,5 +152,35 @@ public class AddNewContact extends AppCompatActivity {
         // Navigate back to MainActivity
         startActivity(new Intent(this, MainActivity.class));
         finish();
+    }
+    private class ValidationTextWatcher implements TextWatcher {
+        private final View view;
+
+        private ValidationTextWatcher(View view) {
+            this.view = view;
+        }
+
+        @Override
+        public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+        @Override
+        public void onTextChanged(CharSequence s, int start, int before, int count) {
+            if (!firstName.getText().toString().trim().isEmpty())
+               {
+                firstNameInputLayout.setError(null);
+            }
+
+            if (Patterns.EMAIL_ADDRESS.matcher(email.getText().toString().trim()).matches())
+                {
+                    emailInputLayout.setError(null);
+                }
+
+            if (mobileNumber.getText().toString().trim().length() ==10 )  {
+                mobileNumberInputLayout.setError(null);
+            }
+        }
+
+        @Override
+        public void afterTextChanged(Editable s) {}
     }
 }

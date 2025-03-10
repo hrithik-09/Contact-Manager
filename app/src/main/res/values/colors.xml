@@ -2,7 +2,7 @@
 <resources>
     <color name="textPrimary">#000000</color>
     <color name="textSecondary">#FFFFFF</color>
-
+    <color name="error">#FF0000</color>
     <color name="fab_background">#FFFFFF</color>
     <color name="background_primary">#F6F6F6</color>
 
