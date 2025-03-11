@@ -23,4 +23,7 @@ public interface ContactDAO {
 
     @Query("SELECT * FROM contact_table ORDER BY firstName ASC,surname ASC")
     LiveData<List<Contact>> getAllContact();
+
+    @Query("SELECT * FROM contact_table WHERE id = :contactId")
+    LiveData<Contact> getContactById(int contactId);
 }

@@ -3,10 +3,15 @@ package com.example.contacts;
 import android.app.DatePickerDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.Manifest;
+
 import android.os.Parcel;
 import android.provider.MediaStore;
 import android.text.Editable;
@@ -23,7 +28,10 @@ import android.widget.Toast;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.google.android.material.bottomsheet.BottomSheetDialog;
@@ -32,6 +40,9 @@ import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -39,6 +50,8 @@ import java.util.Locale;
 
 public class AddNewContact extends AppCompatActivity {
     private MyViewModel myViewModel;
+    private static final int REQUEST_PERMISSION_CODE = 101;
+
     private Contact contact;
 
     private ImageView contactImage, addImageIcon,goBack;
@@ -51,10 +64,36 @@ public class AddNewContact extends AppCompatActivity {
                     Uri selectedImageUri = result.getData().getData();
                     if (selectedImageUri != null) {
                         contactImage.setImageURI(selectedImageUri);
-                        contact.setProfileImageUri(selectedImageUri.toString());
+                        String savedImagePath = saveImageToInternalStorage(selectedImageUri);
+                        if (savedImagePath != null) {
+                            contact.setProfileImageUri(savedImagePath); // Save the file path
+                        }
                     }
                 }
             });
+
+    private String saveImageToInternalStorage(Uri imageUri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+            File directory = new File(getFilesDir(), "images");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String fileName = "contact_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(directory, fileName);
+
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            }
+
+            return imageFile.getAbsolutePath(); // Return the saved image path
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Handle errors properly
+        }
+    }
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -83,7 +122,15 @@ public class AddNewContact extends AppCompatActivity {
         myViewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
         // Click listeners
-        addImageIcon.setOnClickListener(v -> openImagePicker());
+        addImageIcon.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker();
+            } else {
+                requestPermissions();
+            }
+        });
+
         birthday.setOnClickListener(v -> showDatePicker());
         saveButton.setOnClickListener(v -> saveContact());
         cancelButton.setOnClickListener(v -> finish()); // Simply close the activity
@@ -131,6 +178,34 @@ public class AddNewContact extends AppCompatActivity {
 
 
 
+    }
+    private void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_MEDIA_IMAGES},
+                    REQUEST_PERMISSION_CODE);
+        } else {
+            // For Android 6.0 to 12
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION_CODE);
+        }
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker(); // Call the method to open the image picker
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
 
@@ -215,6 +290,7 @@ public class AddNewContact extends AppCompatActivity {
         String emailText = email.getText().toString().trim();
         String addressText = address.getText().toString().trim();
         String mobileNumberText=mobileNumber.getText().toString().trim();
+        String birthdayText=birthday.getText().toString().trim();
 
         if (firstNameText.isEmpty()) {
             firstNameInputLayout.setError("First Name is required");
@@ -244,6 +320,7 @@ public class AddNewContact extends AppCompatActivity {
         contact.setEmail(emailText);
         contact.setAddress(addressText);
         contact.setMobileNumber(mobileNumberText);
+        contact.setBirthday(birthdayText);
 
 
         myViewModel.addNewContact(contact);

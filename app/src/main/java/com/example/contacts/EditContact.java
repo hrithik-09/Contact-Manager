@@ -1,14 +1,20 @@
 package com.example.contacts;
 
+import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.View;
 import android.view.WindowManager;
@@ -20,18 +26,26 @@ import android.widget.Toast;
 import androidx.activity.EdgeToEdge;
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
+import com.bumptech.glide.Glide;
 import com.google.android.material.bottomsheet.BottomSheetDialog;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.textfield.TextInputEditText;
 import com.google.android.material.textfield.TextInputLayout;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
@@ -40,21 +54,67 @@ import java.util.Locale;
 public class EditContact extends AppCompatActivity {
     private MyViewModel myViewModel;
     private Contact contact;
-
+//    private Uri selectedImageUri;
     private ImageView contactImage, addImageIcon,goBack;
     private TextInputEditText firstName, surname, prefix, email, address, birthday,mobileNumber;
     private TextInputLayout firstNameInputLayout,mobileNumberInputLayout,emailInputLayout,birthdayInputLayout;
     private TextView saveButton, cancelButton;
+    private int contactId;
+    private static final int REQUEST_PERMISSION_CODE = 101;
     private final ActivityResultLauncher<Intent> imagePickerLauncher =
             registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
                 if (result.getResultCode() == RESULT_OK && result.getData() != null) {
                     Uri selectedImageUri = result.getData().getData();
                     if (selectedImageUri != null) {
                         contactImage.setImageURI(selectedImageUri);
-                        contact.setProfileImageUri(selectedImageUri.toString());
+
+                        // Delete old image (if exists) before saving a new one
+                        if (contact.getProfileImageUri() != null) {
+                            deleteOldImage(contact.getProfileImageUri());
+                        }
+
+                        // Save the new image to internal storage
+                        String savedImagePath = saveImageToInternalStorage(selectedImageUri);
+                        if (savedImagePath != null) {
+                            contact.setProfileImageUri(savedImagePath); // Save the new path
+                        }
                     }
                 }
             });
+
+    // Method to delete old image when replaced
+    private void deleteOldImage(String oldImagePath) {
+        File oldImageFile = new File(oldImagePath);
+        if (oldImageFile.exists()) {
+            boolean deleted = oldImageFile.delete();
+            if (!deleted) {
+                Log.e("EditContact", "Failed to delete old image: " + oldImagePath);
+            }
+        }
+    }
+
+    private String saveImageToInternalStorage(Uri imageUri) {
+        try {
+            Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+            File directory = new File(getFilesDir(), "images");
+            if (!directory.exists()) {
+                directory.mkdirs();
+            }
+
+            String fileName = "contact_" + System.currentTimeMillis() + ".jpg";
+            File imageFile = new File(directory, fileName);
+
+            try (FileOutputStream fos = new FileOutputStream(imageFile)) {
+                bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+            }
+
+            return imageFile.getAbsolutePath(); // Return the saved image path
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null; // Handle errors properly
+        }
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,11 +139,18 @@ public class EditContact extends AppCompatActivity {
         cancelButton = findViewById(R.id.cancelButton);
         mobileNumber = findViewById(R.id.mobileNumber);
         goBack=findViewById(R.id.goBack);
-        contact = new Contact();
+//        currentContact = new Contact();
         myViewModel = new ViewModelProvider(this).get(MyViewModel.class);
 
         // Click listeners
-        addImageIcon.setOnClickListener(v -> openImagePicker());
+        addImageIcon.setOnClickListener(v -> {
+            if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE) == PackageManager.PERMISSION_GRANTED
+                    || ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_IMAGES) == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker();
+            } else {
+                requestPermissions();
+            }
+        });
         birthday.setOnClickListener(v -> showDatePicker());
         saveButton.setOnClickListener(v -> saveContact());
         cancelButton.setOnClickListener(v -> finish()); // Simply close the activity
@@ -128,8 +195,60 @@ public class EditContact extends AppCompatActivity {
 
         birthdayInputLayout.setEndIconOnClickListener(v -> showDatePicker());
 
+        contactId = getIntent().getIntExtra("CONTACT_ID", -1);
+        if (contactId != -1) {
+            myViewModel.getContactById(contactId).observe(this, fetchedContact -> {
+                if (fetchedContact != null) {
+                    contact = fetchedContact; // Initialize contact here
+                    firstName.setText(contact.getFirstName());
+                    surname.setText(contact.getSurname());
+                    prefix.setText(contact.getPrefix());
+                    birthday.setText(contact.getBirthday());
+                    address.setText(contact.getAddress());
+                    if (contact.getProfileImageUri() != null) {
+                        Uri selectedImageUri = Uri.parse(contact.getProfileImageUri());
+                        contactImage.setImageURI(selectedImageUri);
+                    }
+                    mobileNumber.setText(contact.getMobileNumber());
+                    email.setText(contact.getEmail());
+                } else {
+                    contact = new Contact(); // Fallback if no contact is found
+                }
+            });
+        } else {
+            contact = new Contact(); // New contact for adding flow
+        }
 
 
+    }
+
+    private void requestPermissions() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            // For Android 13+
+            ActivityCompat.requestPermissions(this,
+                    new String[]{android.Manifest.permission.READ_MEDIA_IMAGES},
+                    REQUEST_PERMISSION_CODE);
+        } else {
+            // For Android 6.0 to 12
+            ActivityCompat.requestPermissions(this,
+                    new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                    REQUEST_PERMISSION_CODE);
+        }
+    }
+
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_CODE) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                openImagePicker(); // Call the method to open the image picker
+                Toast.makeText(this, "Permission Granted", Toast.LENGTH_SHORT).show();
+            } else {
+                Toast.makeText(this, "Permission Denied", Toast.LENGTH_SHORT).show();
+            }
+        }
     }
 
     private void showDatePicker() {
@@ -206,51 +325,67 @@ public class EditContact extends AppCompatActivity {
         email.addTextChangedListener(new EditContact.ValidationTextWatcher(email));
         mobileNumber.addTextChangedListener(new EditContact.ValidationTextWatcher(mobileNumber));
     }
-    private void saveContact() {
-        String firstNameText = firstName.getText().toString().trim();
-        String surnameText = surname.getText().toString().trim();
-        String prefixText = prefix.getText().toString().trim();
-        String emailText = email.getText().toString().trim();
-        String addressText = address.getText().toString().trim();
-        String mobileNumberText=mobileNumber.getText().toString().trim();
 
-        if (firstNameText.isEmpty()) {
+    private void saveContact() {
+        String updatedFirstName = firstName.getText().toString().trim();
+        String updatedSurname = surname.getText().toString().trim();
+        String updatedPrefix = prefix.getText().toString().trim();
+        String updatedBirthday = birthday.getText().toString().trim();
+        String updatedAddress = address.getText().toString().trim();
+        String updatedMobileNumber = mobileNumber.getText().toString().trim();
+        String updatedEmail = email.getText().toString().trim();
+
+        // Ensure 'contact' is initialized
+        if (contact == null) {
+            contact = new Contact();
+        }
+
+        // Set profile image URI (ensure selectedImageUri is prioritized)
+//        contact.setProfileImageUri(selectedImageUri != null ? selectedImageUri.toString() : contact.getProfileImageUri());
+
+        // Validation
+        if (updatedFirstName.isEmpty()) {
             firstNameInputLayout.setError("First Name is required");
             return;
         } else {
             firstNameInputLayout.setError(null);
         }
 
-        if (!Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
+        if (!updatedEmail.isEmpty() && !Patterns.EMAIL_ADDRESS.matcher(updatedEmail).matches()) {
             emailInputLayout.setError("Invalid email format");
             return;
         } else {
             emailInputLayout.setError(null);
         }
 
-        if (mobileNumber.length() !=10 ) {
+        if (updatedMobileNumber.length() != 10) {
             mobileNumberInputLayout.setError("Mobile no. must be 10 digits");
             return;
         } else {
             mobileNumberInputLayout.setError(null);
         }
 
+        // Assign updated data to the contact object
+        contact.setFirstName(updatedFirstName);
+        contact.setSurname(updatedSurname);
+        contact.setPrefix(updatedPrefix);
+        contact.setBirthday(updatedBirthday);
+        contact.setAddress(updatedAddress);
+        contact.setMobileNumber(updatedMobileNumber);
+        contact.setEmail(updatedEmail);
 
-        contact.setFirstName(firstNameText);
-        contact.setSurname(surnameText);
-        contact.setPrefix(prefixText);
-        contact.setEmail(emailText);
-        contact.setAddress(addressText);
-        contact.setMobileNumber(mobileNumberText);
-
-
-        myViewModel.addNewContact(contact);
-        Toast.makeText(this, "Contact Saved!", Toast.LENGTH_SHORT).show();
-
+        if (contactId != -1) {
+            myViewModel.updateExistingContact(contact);  // Update existing contact
+            Toast.makeText(this, "Contact Updated!", Toast.LENGTH_SHORT).show();
+        } else {
+            myViewModel.addNewContact(contact);  // Add new contact if no ID exists
+            Toast.makeText(this, "New Contact Added!", Toast.LENGTH_SHORT).show();
+        }
 
         startActivity(new Intent(this, MainActivity.class));
         finish();
     }
+
     private class ValidationTextWatcher implements TextWatcher {
         private final View view;
 

@@ -39,6 +39,14 @@ public class Repository {
         });
     }
 
+    public void updateContact(Contact contact){
+        executor.execute(new Runnable() {
+            @Override
+            public void run() {
+                contactDAO.update(contact);
+            }
+        });
+    }
     public void deleteContact(Contact contact){
         executor.execute(new Runnable() {
             @Override
@@ -47,7 +55,9 @@ public class Repository {
             }
         });
     }
-
+    public LiveData<Contact> getContactById(int contactId) {
+        return contactDAO.getContactById(contactId);
+    }
     public LiveData<List<Contact>>getAllContact(){
         return contactDAO.getAllContact();
     }

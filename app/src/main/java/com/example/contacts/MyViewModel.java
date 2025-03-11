@@ -1,11 +1,13 @@
 package com.example.contacts;
 
 import android.app.Application;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
 
+import java.io.File;
 import java.util.List;
 
 public class MyViewModel extends AndroidViewModel {
@@ -27,7 +29,28 @@ public class MyViewModel extends AndroidViewModel {
         myRepository.addContact(contact);
     }
 
+    public void updateExistingContact(Contact contact){
+        myRepository.updateContact(contact);
+    }
+
     public void deleteContact(Contact contact){
+        if (contact.getProfileImageUri() != null) {
+            deleteImage(contact.getProfileImageUri());
+        }
         myRepository.deleteContact(contact);
+    }
+
+    public LiveData<Contact> getContactById(int contactId) {
+        return myRepository.getContactById(contactId);
+    }
+
+    private void deleteImage(String imagePath) {
+        File imageFile = new File(imagePath);
+        if (imageFile.exists()) {
+            boolean deleted = imageFile.delete();
+            if (!deleted) {
+                Log.e("MyViewModel", "Failed to delete image: " + imagePath);
+            }
+        }
     }
 }

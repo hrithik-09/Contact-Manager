@@ -21,6 +21,18 @@ public class Contact {
 
     private String mobileNumber;
 
+    public Contact(int id, String profileImageUri, String prefix, String firstName, String surname, String email, String birthday, String address, String mobileNumber) {
+        this.id = id;
+        this.profileImageUri = profileImageUri;
+        this.prefix = prefix;
+        this.firstName = firstName;
+        this.surname = surname;
+        this.email = email;
+        this.birthday = birthday;
+        this.address = address;
+        this.mobileNumber = mobileNumber;
+    }
+
     public Contact(String profileImageUri, String prefix, String firstName, String surname,
                    String email, String birthday, String address, String mobileNumber) {
         this.profileImageUri = profileImageUri;
