@@ -6,8 +6,10 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MyViewModel extends AndroidViewModel {
@@ -24,6 +26,7 @@ public class MyViewModel extends AndroidViewModel {
         allContacts= myRepository.getAllContact();
         return allContacts;
     }
+
 
     public void addNewContact(Contact contact){
         myRepository.addContact(contact);
@@ -47,10 +50,7 @@ public class MyViewModel extends AndroidViewModel {
     private void deleteImage(String imagePath) {
         File imageFile = new File(imagePath);
         if (imageFile.exists()) {
-            boolean deleted = imageFile.delete();
-            if (!deleted) {
-                Log.e("MyViewModel", "Failed to delete image: " + imagePath);
-            }
+            imageFile.delete();
         }
     }
 }

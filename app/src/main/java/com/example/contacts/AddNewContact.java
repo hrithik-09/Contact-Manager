@@ -299,11 +299,14 @@ public class AddNewContact extends AppCompatActivity {
             firstNameInputLayout.setError(null);
         }
 
+        if (!emailText.isEmpty()){
+
         if (!Patterns.EMAIL_ADDRESS.matcher(emailText).matches()) {
             emailInputLayout.setError("Invalid email format");
             return;
         } else {
             emailInputLayout.setError(null);
+        }
         }
 
         if (mobileNumber.length() !=10 ) {

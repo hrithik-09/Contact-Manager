@@ -4,4 +4,7 @@
     <color name="fab_background">#000000</color>
     <color name="background_primary">#000000</color>
     <color name="textSecondary">#000000</color>
+    <color name="green">#4CAF50</color>
+    <color name="red">#FF0000</color>
+    <color name="separator_line">#232323</color>
 </resources>

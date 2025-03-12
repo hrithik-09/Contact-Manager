@@ -5,7 +5,6 @@
             <solid android:color="#000000"/> <!-- Thumb color when checked -->
             <size android:width="30dp" android:height="30dp"/>
             <stroke android:width="2dp" android:color="#FFFFFF"/>
-            <shadow android:shadowColor="#80000000" android:radius="4dp"/>
         </shape>
     </item>
     <item>
@@ -13,7 +12,6 @@
             <solid android:color="#B0BEC5"/> <!-- Thumb color when unchecked -->
             <size android:width="30dp" android:height="30dp"/>
             <stroke android:width="2dp" android:color="#FFFFFF"/>
-            <shadow android:shadowColor="#80000000" android:radius="4dp"/>
         </shape>
     </item>
 </selector>
