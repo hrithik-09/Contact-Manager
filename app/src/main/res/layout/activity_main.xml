@@ -68,7 +68,18 @@
             android:layout_margin="15dp"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
+    <ImageView
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_margin="20dp"
+        android:padding="20dp"
+        android:src="@drawable/ic_background_contact"
+        android:id="@+id/backgroundContact"
+        app:layout_constraintTop_toBottomOf="@id/mainHeader"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        android:visibility="gone"/>
     <androidx.recyclerview.widget.RecyclerView
         android:layout_width="0dp"
         android:layout_height="0dp"

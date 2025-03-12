@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -27,41 +28,38 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
     @NonNull
     @Override
     public ContactViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        ContactListBinding contactListBinding = DataBindingUtil.inflate(
-                LayoutInflater.from(parent.getContext()),
-                R.layout.contact_list,
-                parent,
-                false
-        );
-        return new ContactViewHolder(contactListBinding);
+        View view = LayoutInflater.from(parent.getContext())
+                .inflate(R.layout.contact_list, parent, false);
+        return new ContactViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(@NonNull ContactViewHolder holder, int position) {
         Contact currentContact=contacts.get(position);
-        holder.contactListBinding.setContact(currentContact);
-
-        Glide.with(holder.itemView.getContext()).clear(holder.contactListBinding.contactImage);
+        holder.contactPName.setText(currentContact.getPrefix());
+        holder.contactFName.setText(currentContact.getFirstName());
+        holder.contactSName.setText(currentContact.getSurname());
+        Glide.with(holder.itemView.getContext()).clear(holder.contactImage);;
         if (currentContact.getProfileImageUri() != null) {
 
-            holder.contactListBinding.contactImage.setVisibility(View.VISIBLE);
-            holder.contactListBinding.contactInitial.setVisibility(View.GONE);
+            holder.contactImage.setVisibility(View.VISIBLE);
+            holder.contactInitial.setVisibility(View.GONE);
 
             Glide.with(holder.itemView.getContext())
                     .load(currentContact.getProfileImageUri())
                     .circleCrop()
-                    .into(holder.contactListBinding.contactImage);
+                    .into(holder.contactImage);
         } else {
 
-            holder.contactListBinding.contactImage.setVisibility(View.GONE);
-            holder.contactListBinding.contactInitial.setVisibility(View.VISIBLE);
+            holder.contactImage.setVisibility(View.GONE);
+            holder.contactInitial.setVisibility(View.VISIBLE);
+
             String firstName = currentContact.getFirstName();
             if (firstName != null && !firstName.trim().isEmpty()) {
                 String firstLetter = String.valueOf(firstName.trim().charAt(0)).toUpperCase();
-                holder.contactListBinding.contactInitial.setText(firstLetter);
+                holder.contactInitial.setText(firstLetter);
             } else {
-
-                holder.contactListBinding.contactInitial.setText("#");
+                holder.contactInitial.setText("#");
             }
         }
         holder.itemView.setOnClickListener(v -> {
@@ -87,12 +85,18 @@ public class ContactAdapter extends RecyclerView.Adapter<ContactAdapter.ContactV
         notifyDataSetChanged();
     }
 
-    class ContactViewHolder extends RecyclerView.ViewHolder{
-        private ContactListBinding contactListBinding;
+    class ContactViewHolder extends RecyclerView.ViewHolder {
+        ImageView contactImage;
+        TextView contactInitial,contactPName,contactFName,contactSName;
 
-        public ContactViewHolder(@NonNull ContactListBinding contactListBinding) {
-            super(contactListBinding.getRoot());
-            this.contactListBinding = contactListBinding;
+
+        public ContactViewHolder(@NonNull View itemView) {
+            super(itemView);
+            contactImage = itemView.findViewById(R.id.contactImage);
+            contactInitial = itemView.findViewById(R.id.contactInitial);
+            contactFName=itemView.findViewById(R.id.contactFName);
+            contactPName=itemView.findViewById(R.id.contactPName);
+            contactSName=itemView.findViewById(R.id.contactSName);
         }
     }
 }

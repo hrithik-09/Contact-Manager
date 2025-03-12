@@ -6,7 +6,9 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.drawable.ColorDrawable;
+import android.media.ExifInterface;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -76,7 +78,7 @@ public class EditContact extends AppCompatActivity {
                         // Save the new image to internal storage
                         String savedImagePath = saveImageToInternalStorage(selectedImageUri);
                         if (savedImagePath != null) {
-                            contact.setProfileImageUri(savedImagePath); // Save the new path
+                            contact.setProfileImageUri(savedImagePath);
                         }
                     }
                 }
@@ -96,6 +98,16 @@ public class EditContact extends AppCompatActivity {
     private String saveImageToInternalStorage(Uri imageUri) {
         try {
             Bitmap bitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
+
+            // Correct the image orientation
+            InputStream inputStream = getContentResolver().openInputStream(imageUri);
+            if (inputStream != null) {
+                ExifInterface exif = new ExifInterface(inputStream);
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED);
+                bitmap = rotateBitmap(bitmap, orientation);
+            }
+
+            // Save the corrected image
             File directory = new File(getFilesDir(), "images");
             if (!directory.exists()) {
                 directory.mkdirs();
@@ -108,13 +120,29 @@ public class EditContact extends AppCompatActivity {
                 bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
             }
 
-            return imageFile.getAbsolutePath(); // Return the saved image path
+            return imageFile.getAbsolutePath();
         } catch (IOException e) {
             e.printStackTrace();
-            return null; // Handle errors properly
+            return null;
         }
     }
-
+    private Bitmap rotateBitmap(Bitmap bitmap, int orientation) {
+        Matrix matrix = new Matrix();
+        switch (orientation) {
+            case ExifInterface.ORIENTATION_ROTATE_90:
+                matrix.postRotate(90);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_180:
+                matrix.postRotate(180);
+                break;
+            case ExifInterface.ORIENTATION_ROTATE_270:
+                matrix.postRotate(270);
+                break;
+            default:
+                return bitmap; // No rotation needed
+        }
+        return Bitmap.createBitmap(bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -339,9 +367,6 @@ public class EditContact extends AppCompatActivity {
         if (contact == null) {
             contact = new Contact();
         }
-
-        // Set profile image URI (ensure selectedImageUri is prioritized)
-//        contact.setProfileImageUri(selectedImageUri != null ? selectedImageUri.toString() : contact.getProfileImageUri());
 
         // Validation
         if (updatedFirstName.isEmpty()) {

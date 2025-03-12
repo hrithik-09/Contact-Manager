@@ -3,12 +3,14 @@ import com.example.contacts.BuildConfig;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.res.Configuration;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -39,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
     private FloatingActionButton addContactIcon;
     private ImageView add,toggle;
     private Switch darkModeSwitch;
+    private ImageView contactImageBackground;
     private SharedPreferences sharedPreferences;
     private SharedPreferences.Editor editor;
     private DrawerLayout drawerLayout;
@@ -47,45 +50,46 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
+        boolean isDarkMode = sharedPreferences.getBoolean("isDarkMode", isSystemDarkModeEnabled());
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
 
-        sharedPreferences = getSharedPreferences("AppPrefs", MODE_PRIVATE);
-        boolean isDarkMode = sharedPreferences.getBoolean("isDarkMode", isSystemDarkModeEnabled());
-        darkModeSwitch=findViewById(R.id.dark_mode_switch);
 
-        if (isDarkMode) {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            updateSwitchText();
-        } else {
-            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
-            updateSwitchText();
-        }
 
-        // Set initial switch text based on the current mode
-        updateSwitchText();
+        darkModeSwitch = findViewById(R.id.dark_mode_switch);
         darkModeSwitch.setChecked(isDarkMode);
 
-        darkModeSwitch.setOnCheckedChangeListener((CompoundButton buttonView, boolean isChecked) -> {
-            if (isChecked) {
+        // Check current theme state to prevent redundant recreation
+        int currentMode = getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK;
+
+        if (isDarkMode && currentMode != Configuration.UI_MODE_NIGHT_YES) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
+        } else if (!isDarkMode && currentMode != Configuration.UI_MODE_NIGHT_NO) {
+            AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
+        }
+
+        updateSwitchText(isDarkMode);
+
+        darkModeSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            // Save preference
+            sharedPreferences.edit().putBoolean("isDarkMode", isChecked).apply();
+
+            // Switch theme only if there's a change
+            if (isChecked && currentMode != Configuration.UI_MODE_NIGHT_YES) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_YES);
-            } else {
+            } else if (!isChecked && currentMode != Configuration.UI_MODE_NIGHT_NO) {
                 AppCompatDelegate.setDefaultNightMode(AppCompatDelegate.MODE_NIGHT_NO);
             }
-
-            // Save user preference
-            editor = sharedPreferences.edit();
-            editor.putBoolean("isDarkMode", isChecked);
-            editor.apply();
-
-            recreate();
         });
+
 
         //RecyclerView
         RecyclerView recyclerView = findViewById(R.id.recyclerViewContactList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setHasFixedSize(true);
+        contactImageBackground=findViewById(R.id.backgroundContact);
 
         //Database
         contactDatabase =ContactDatabase.getInstance(this);
@@ -96,6 +100,15 @@ public class MainActivity extends AppCompatActivity {
         viewModel.getAllContacts().observe(this, new Observer<List<Contact>>() {
             @Override
             public void onChanged(List<Contact> contacts) {
+                if (contacts.isEmpty())
+                {
+                    recyclerView.setVisibility(View.GONE);
+                    contactImageBackground.setVisibility(View.VISIBLE);
+                }
+                else {
+                    recyclerView.setVisibility(View.VISIBLE);
+                    contactImageBackground.setVisibility(View.GONE);
+                }
                 contactsArrayList.clear();
                 for (Contact c : contacts){
                     contactsArrayList.add(c);
@@ -225,12 +238,8 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
-    private void updateSwitchText() {
-        if (AppCompatDelegate.getDefaultNightMode() == AppCompatDelegate.MODE_NIGHT_YES) {
-            darkModeSwitch.setText("Dark Mode");
-        } else {
-            darkModeSwitch.setText("Light Mode");
-        }
+    private void updateSwitchText(boolean isDarkMode) {
+        darkModeSwitch.setText(isDarkMode ? "Light Mode" : "Dark Mode");
     }
 
 
