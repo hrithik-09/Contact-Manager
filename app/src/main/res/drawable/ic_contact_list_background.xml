@@ -7,12 +7,6 @@
 
         <!-- Background gradient -->
         <solid android:color="#FCFCFC"/>
-        <!--            <size android:height="115dp"/>-->
-        <!-- Stroke with a gradient effect workaround -->
-
-
-        <!-- A workaround for gradient stroke: Adding a secondary overlay -->
-        <!--            <solid android:color="@android:color/transparent"/>-->
     </shape>
 </item>
 </selector>
